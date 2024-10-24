@@ -64,6 +64,19 @@ def pydantic_object_record(obj: PydanticBaseModelGeneral) -> ObjectRecord:
         attrs[k] = types.MethodType(v, obj)
     attrs["_class_name"] = obj.__class__.__name__
     attrs["_bases"] = class_all_bases_names(obj.__class__)
+    # HACK - the backend tries to determine what category an object is
+    # by looking at what comes immediately before "Object" and "BaseModel"
+    # in the _bases list. i.e. something will be classified as a Model if its
+    # class hierarchy looks like:
+    # ['Model',  'Object', 'BaseModel'] or
+    # ['MyModel', 'Model', 'Object', 'BaseModel']
+    # Ref: get_base_object_class in clickhouse and sqlite
+    #
+    # Our Prompt object uses multiple inheritance which breaks this. (Its
+    # third from end is Container.) So we hackily insert "Prompt" into the
+    # _bases list to get the backend to classify it as a Prompt.
+    if attrs["_class_name"] == "Prompt":
+        attrs["_bases"].insert(-2, "Prompt")
     return ObjectRecord(attrs)
 
 

@@ -54,6 +54,7 @@ const sidebars: SidebarsConfig = {
             "guides/tracking/objects",
           ],
         },
+        "guides/core-types/prompts",
         "guides/core-types/models",
         "guides/core-types/datasets",
         "guides/core-types/evaluations",

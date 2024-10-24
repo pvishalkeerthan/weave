@@ -29,6 +29,8 @@ import {
 import {EvaluationLeaderboardTab} from './LeaderboardTab';
 import {TabUseDataset} from './TabUseDataset';
 import {TabUseModel} from './TabUseModel';
+import {TabPrompt} from './TabPrompt';
+import {TabUsePrompt} from './TabUsePrompt';
 import {TabUseObject} from './TabUseObject';
 import {KNOWN_BASE_OBJECT_CLASSES} from './wfReactInterface/constants';
 import {useWFHooks} from './wfReactInterface/context';
@@ -126,6 +128,8 @@ const ObjectVersionPageInner: React.FC<{
       : null;
   }, [objectVersion.baseObjectClass]);
   const refUri = objectVersionKeyToRefUri(objectVersion);
+
+  const showPromptTab = baseObjectClass === 'Prompt';
 
   const minimalColumns = useMemo(() => {
     return ['id', 'op_name', 'project_id'];
@@ -287,6 +291,26 @@ const ObjectVersionPageInner: React.FC<{
       //   },
       // ]}
       tabs={[
+        ...(showPromptTab
+          ? [
+              {
+                label: 'Prompt',
+                content: (
+                  <ScrollableTabContent>
+                    {data.loading ? (
+                      <CenteredAnimatedLoader />
+                    ) : (
+                      <TabPrompt
+                        entity={entityName}
+                        project={projectName}
+                        data={viewerDataAsObject}
+                      />
+                    )}
+                  </ScrollableTabContent>
+                ),
+              },
+            ]
+          : []),
         ...(isEvaluation && evalHasCalls
           ? [
               {
@@ -334,7 +358,15 @@ const ObjectVersionPageInner: React.FC<{
           label: 'Use',
           content: (
             <Tailwind>
-              {baseObjectClass === 'Dataset' ? (
+              {baseObjectClass === 'Prompt' ? (
+                <TabUsePrompt
+                  name={objectName}
+                  uri={refUri}
+                  entityName={entityName}
+                  projectName={projectName}
+                  data={viewerDataAsObject}
+                />
+              ) : baseObjectClass === 'Dataset' ? (
                 <TabUseDataset
                   name={objectName}
                   uri={refUri}
